@@ -15,7 +15,7 @@ class InfluxDbSink {
     }
 
     tryPush(data: DavisResponseData) {
-        if((Date.now() - this.#lastUpload.getUTCDate()) < this.#uploadInterval * 1000) {
+        if((Date.now() - this.#lastUpload.getTime()) < this.#uploadInterval * 1000) {
             logger.debug(`Nothing to do. Last upload was ${this.#lastUpload}`, { component: 'InfluxDbSink'})
             return
         }
@@ -28,6 +28,7 @@ class InfluxDbSink {
             logger.error(`Error pushing data to influxDB. Error: ${error}`, { component: 'InfluxDbSink'})
         })
 
+        this.#lastUpload = new Date();
     }
 
     private buildQueryString(data: DavisResponseData): string {
