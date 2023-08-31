@@ -24,7 +24,8 @@ type DavisResponseData = {
     RainLast1h: number,
     RainLast24h: number,
     RainMonth: number,
-    RainYear: number
+    RainYear: number,
+    [key: string]: number
 }
 
 class DavisIpCollector {
