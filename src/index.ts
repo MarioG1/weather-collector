@@ -1,10 +1,11 @@
+import config from 'config';
 import logger from "./modules/logger";
 import davisIpCollector, {DavisResponseData} from "./modules/davisIpCollector";
 
 
 logger.info("Application Startup....",  { component: "main" })
 
-const davisIP = new davisIpCollector('192.168.1.104', 22222, 5000)
+const davisIP = new davisIpCollector(config.get('davisIP.ip'), config.get('davisIP.port'), config.get('davisIP.timeout'))
 
 //setInterval(getDataFromWeatherStation, 10000);
 getDataFromWeatherStation()

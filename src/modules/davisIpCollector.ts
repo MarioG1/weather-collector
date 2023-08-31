@@ -40,7 +40,7 @@ class DavisIpCollector {
     }
 
      readDataFromStation() {
-        return new Promise<DavisResponseData>((resolve, reject) => {
+        return new Promise<DavisResponseData>((resolve) => {
             let client = new Socket()
             let receiveBuffer = Buffer.from('', 'hex')
 
