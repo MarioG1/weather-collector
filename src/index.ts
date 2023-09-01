@@ -14,7 +14,8 @@ const weatherCloudSink = new WeatherCloudSink(config.get('uploadServices.weather
 const weatherUndergroundSink = new WeatherUndergroundSink(config.get('uploadServices.weatherunderground.apiUrl'), config.get('uploadServices.weatherunderground.user'), config.get('uploadServices.weatherunderground.password'), config.get('uploadServices.weatherunderground.timeout'), config.get('uploadServices.weatherunderground.uploadInterval'))
 const weatherComSink = new WeatherComSink(config.get('uploadServices.wettercom.apiUrl'), config.get('uploadServices.wettercom.user'), config.get('uploadServices.wettercom.password'), config.get('uploadServices.wettercom.timeout'), config.get('uploadServices.wettercom.uploadInterval'))
 
-setInterval(getDataFromWeatherStation, 10000);
+setInterval(getDataFromWeatherStation, 10000)
+setInterval(updateTime, 86400000)
 
 function getDataFromWeatherStation() {
     davisIP.readDataFromStation().then((data: DavisResponseData) => {
@@ -25,5 +26,14 @@ function getDataFromWeatherStation() {
         weatherComSink.tryPush(data)
     }).catch((error) => {
         logger.error(`Something went wrong while fetching data from weather-station. Error: ${error}`, { component: "main" })
+    })
+}
+
+function updateTime() {
+    logger.info("Updating time on weather station started", { component: "main" })
+    davisIP.setTime().then(() => {
+        logger.info("Updating time on weather station finished", { component: "main" })
+    }).catch((error) => {
+        logger.error(`Updating time on weather station failed. Error: ${error}`, { component: "main" })
     })
 }

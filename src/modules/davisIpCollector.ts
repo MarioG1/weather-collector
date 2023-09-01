@@ -1,4 +1,4 @@
-import { Socket } from 'net'
+import net, { Socket } from 'net'
 import logger from './logger'
 import * as UnitConversion from "./unitConverstion"
 
@@ -77,6 +77,7 @@ class DavisIpCollector {
 
             client.on('error', (error) => {
                 logger.error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`, { component: 'DavisIpCollector'})
+                throw new Error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`)
             })
 
             client.on('close', () => {
@@ -86,8 +87,65 @@ class DavisIpCollector {
             client.on('timeout', () => {
                 logger.warn(`No response from ${this.#ip} after ${this.#timeout}ms`, { component: 'DavisIpCollector'})
                 client.end();
+                throw new Error(`No response from ${this.#ip} after ${this.#timeout}ms`)
             })
         })
+    }
+
+    setTime() {
+        return new Promise<void>((resolve) => {
+            let client = new Socket()
+            let receiveBuffer = Buffer.from('', 'hex')
+            let timeSent = false;
+
+            client.setTimeout(this.#timeout)
+
+            logger.info(`Connecting to Davis weather-station on ${this.#ip}:${this.#port} `, { component: 'DavisIpCollector'})
+            client.connect(this.#port, this.#ip, function() {
+                logger.info('Connection to Davis weather-station established', { component: 'DavisIpCollector'})
+
+                setTimeout(() => {
+                    logger.debug('Send SETTIME', { component: 'DavisIpCollector'})
+                    client.write("SETTIME\n",'utf8');
+                },600);
+            });
+
+            client.on('data', (packet) => {
+                receiveBuffer = Buffer.concat([receiveBuffer, packet]);
+
+                if(receiveBuffer.readUInt8() === 6) {
+                    if(!timeSent) {
+                        var davisBinaryTime = this.CalcBinaryTime();
+                        logger.info('Sending current time', { component: 'DavisIpCollector'});
+                        client.write(davisBinaryTime);
+                        timeSent = true;
+                    } else {
+                        logger.info('Time set', { component: 'DavisIpCollector'});
+                        client.end();
+                        resolve();
+                    }
+                } else {
+                    logger.error(`Failed to set time on weather station. Error: Expecting ACK got: ${receiveBuffer.readUInt8()}`, { component: 'DavisIpCollector'})
+                    client.end();
+                    throw new Error('Expecting ACK got: '+ receiveBuffer.readUInt8());
+                }
+            });
+
+            client.on('error', (error) => {
+                logger.error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`, { component: 'DavisIpCollector'})
+                throw new Error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`)
+            })
+
+            client.on('close', () => {
+                logger.info('Connection to weather-station closed', { component: 'DavisIpCollector'})
+            })
+
+            client.on('timeout', () => {
+                logger.warn(`No response from ${this.#ip} after ${this.#timeout}ms`, { component: 'DavisIpCollector'})
+                client.end();
+                throw new Error(`No response from ${this.#ip} after ${this.#timeout}ms`)
+            })
+        });
     }
 
     private parseWeatherStationResponse(response: Buffer): DavisResponseData {
