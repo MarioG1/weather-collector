@@ -1,8 +1,8 @@
 import logger from './logger'
 import axios from "axios";
 import dayjs from "dayjs";
-
 import {DavisResponseData} from "./davisIpCollector";
+import * as UnitConversion from "./unitConverstion"
 
 
 class WeatherCloudSink {
@@ -48,27 +48,17 @@ class WeatherCloudSink {
             'temp': Math.round(data.OutTemp * 10),
             'hum': data.OutHum,
             'wdir': data.WindDir,
-            'wspd': Math.round(this.convert_kmhtoms(data.WindSpeed) * 10),
+            'wspd': Math.round(UnitConversion.Kmhtoms(data.WindSpeed) * 10),
             'bar': Math.round(data.Pressure * 10),
             'rain': Math.round(data.RainDay * 10),
             'rainrate': Math.round(data.RainRate * 10),
             'dew': Math.round(data.DewPoint * 10),
             'chill': Math.round(data.WindChill * 10),
             'heat': Math.round(data.HeatIndex * 10),
-            'wspdhi': Math.round(this.convert_kmhtoms(data.WindGust) * 10),
-            'wspdavg': Math.round(this.convert_kmhtoms(data.WindSpeed10av) * 10),
+            'wspdhi': Math.round(UnitConversion.Kmhtoms(data.WindGust) * 10),
+            'wspdavg': Math.round(UnitConversion.Kmhtoms(data.WindSpeed10av) * 10),
             'wdiravg': data.WindDir10av
         }
-    }
-
-    private convert_kmhtoms(speed: number): number {
-        return this.round(speed/3.6,2)
-    }
-
-    private round(x: number, n: number): number
-    {
-        var a = Math.pow(10, n)
-        return (Math.round(x * a) / a)
     }
 
 }

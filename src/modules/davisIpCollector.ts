@@ -1,5 +1,6 @@
 import { Socket } from 'net'
 import logger from './logger'
+import * as UnitConversion from "./unitConverstion"
 
 type DavisResponseData = {
     BarTrend: number,
@@ -102,34 +103,34 @@ class DavisIpCollector {
         }
 
         if(String.fromCharCode(loop1.readInt8(0), loop1.readInt8(1), loop1.readInt8(2)) === 'LOO' && loop1.readInt8(4) === 0) {
-            data.RainMonth = this.convert_Cltomm(loop1.readInt16LE(52))
-            data.RainYear = this.convert_Cltomm(loop1.readInt16LE(54))
+            data.RainMonth = UnitConversion.Cltomm(loop1.readInt16LE(52))
+            data.RainYear = UnitConversion.Cltomm(loop1.readInt16LE(54))
         } else {
             throw new Error('Data received from Station is not an LOOP 1 Packet')
         }
 
         if(String.fromCharCode(loop2.readInt8(0), loop2.readInt8(1), loop2.readInt8(2)) === 'LOO' && loop2.readInt8(4) === 1) {
             data.BarTrend = loop2.readInt8(3)
-            data.Pressure = this.convert_InHgtoHpa(loop2.readInt16LE(7)/1000)
-            data.InTemp = this.convert_FtoC(loop2.readInt16LE(9)/10)
+            data.Pressure = UnitConversion.InHgtoHpa(loop2.readInt16LE(7)/1000)
+            data.InTemp = UnitConversion.FtoC(loop2.readInt16LE(9)/10)
             data.InHum = loop2.readUInt8(11)
-            data.OutTemp = this.convert_FtoC(loop2.readInt16LE(12)/10)
-            data.WindSpeed = this.convert_MphtoKmh(loop2.readInt8(14))
+            data.OutTemp = UnitConversion.FtoC(loop2.readInt16LE(12)/10)
+            data.WindSpeed = UnitConversion.MphtoKmh(loop2.readInt8(14))
             data.WindDir = loop2.readUInt16LE(16)
             data.WindDir10av = Math.round(this.calcWindDir10Av(data.WindDir))
-            data.WindSpeed10av = this.convert_MphtoKmh(loop2.readUInt16LE(18)/10)
-            data.WindSpeed2av = this.convert_MphtoKmh(loop2.readUInt16LE(20)/10)
-            data.WindGust = this.convert_MphtoKmh(loop2.readUInt16LE(22))
+            data.WindSpeed10av = UnitConversion.MphtoKmh(loop2.readUInt16LE(18)/10)
+            data.WindSpeed2av = UnitConversion.MphtoKmh(loop2.readUInt16LE(20)/10)
+            data.WindGust = UnitConversion.MphtoKmh(loop2.readUInt16LE(22))
             data.WindGustDir = loop2.readUInt16LE(24)
-            data.DewPoint = this.convert_FtoC(loop2.readInt16LE(30))
+            data.DewPoint = UnitConversion.FtoC(loop2.readInt16LE(30))
             data.OutHum = loop2.readUInt8(33)
-            data.HeatIndex = this.convert_FtoC(loop2.readInt16LE(35))
-            data.WindChill = this.convert_FtoC(loop2.readInt16LE(37))
-            data.RainRate = this.convert_Cltomm(loop2.readInt16LE(41))
-            data.RainDay = this.convert_Cltomm(loop2.readInt16LE(50))
-            data.RainLast15m = this.convert_Cltomm(loop2.readInt16LE(52))
-            data.RainLast1h = this.convert_Cltomm(loop2.readInt16LE(54))
-            data.RainLast24h = this.convert_Cltomm(loop2.readInt16LE(58))
+            data.HeatIndex = UnitConversion.FtoC(loop2.readInt16LE(35))
+            data.WindChill = UnitConversion.FtoC(loop2.readInt16LE(37))
+            data.RainRate = UnitConversion.Cltomm(loop2.readInt16LE(41))
+            data.RainDay = UnitConversion.Cltomm(loop2.readInt16LE(50))
+            data.RainLast15m = UnitConversion.Cltomm(loop2.readInt16LE(52))
+            data.RainLast1h = UnitConversion.Cltomm(loop2.readInt16LE(54))
+            data.RainLast24h = UnitConversion.Cltomm(loop2.readInt16LE(58))
         } else {
             throw new Error('Data received from Station is not an LOOP 2 Packet')
         }
@@ -139,28 +140,6 @@ class DavisIpCollector {
         }
 
         return data
-    }
-
-    private convert_InHgtoHpa(pressure: number): number {
-        return this.round(pressure * 33.863886666667,2)
-    }
-
-    private convert_FtoC(tempF: number): number {
-        tempF -= 32
-        return this.round(tempF / 1.8,2)
-    }
-
-    private convert_MphtoKmh(speed: number): number {
-        return this.round(speed * 1.60934,2)
-    }
-
-    private convert_Cltomm(clicks: number): number {
-        return this.round(clicks * 0.2,2)
-    }
-
-    private round(x: number, n: number): number {
-        const a = Math.pow(10, n)
-        return (Math.round(x * a) / a)
     }
 
     private calcWindDir10Av(value: number): number {
