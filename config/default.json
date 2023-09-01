@@ -1,0 +1,40 @@
+{
+  "logging": {
+    "level": "debug"
+  },
+  "davisIP": {
+    "ip": "127.0.0.1",
+    "port": 22222,
+    "timeout": 5000
+  },
+  "uploadServices": {
+    "influxdb" : {
+      "token": "",
+      "org": "",
+      "apiUrl": "http://dweb01.fritz.box:8086/write?db=weather",
+      "uploadInterval": 0,
+      "timeout": 5000
+    },
+    "weathercloud" : {
+      "user": "",
+      "password": "",
+      "apiUrl": "http://api.weathercloud.net/v01/set",
+      "uploadInterval": 600,
+      "timeout": 10000
+    },
+    "weatherunderground" : {
+      "user": "",
+      "password": "",
+      "apiUrl": "http://rtupdate.wunderground.com/weatherstation/updateweatherstation.php",
+      "uploadInterval": 0,
+      "timeout": 5000
+    },
+    "wettercom" : {
+      "user": "",
+      "password": "",
+      "apiUrl": "http://interface.wetterarchiv.de/weather",
+      "uploadInterval": 600,
+      "timeout": 10000
+    }
+  }
+}
