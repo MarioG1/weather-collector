@@ -11,7 +11,7 @@
     "influxdb" : {
       "token": "",
       "org": "",
-      "apiUrl": "http://dweb01.fritz.box:8086/write?db=weather",
+      "apiUrl": "http://xxxx.xxxxx.xxx:8086/write?db=weather",
       "uploadInterval": 0,
       "timeout": 5000
     },
