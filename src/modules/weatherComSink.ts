@@ -46,7 +46,7 @@ class WeatherComSink {
             'pwd': this.#password,
             'sid': 'weewx',
             'version': '3.0',
-            'dtutc': dayjs().utc().format('YYYYYMMDDHHmm'),
+            'dtutc': dayjs().utc().format('YYYYMMDDHHmm'),
             'hu': data.OutHum,
             'te': data.OutTemp,
             'dp': data.DewPoint,
