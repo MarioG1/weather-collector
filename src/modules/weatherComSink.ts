@@ -29,6 +29,7 @@ class WeatherComSink {
             return
         }
 
+        logger.info(`Uploading data to WeatherCom...`, { component: 'WeatherComSink'})
         axios.get(this.#apiUrl, {timeout: this.#timeout, params: this.buildQueryString(data)}).then((resp) => {
             logger.info('Data successfully pushed to WeatherCom.', { component: 'WeatherComSink'})
             logger.debug(`Response Data: ${resp.data}`, { component: 'WeatherComSink'})

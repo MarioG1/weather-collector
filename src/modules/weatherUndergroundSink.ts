@@ -26,6 +26,7 @@ class WeatherUndergroundSink {
             return
         }
 
+        logger.info(`Uploading data to WeatherUnderground...`, { component: 'WeatherUndergroundSink'})
         axios.get(this.#apiUrl, {timeout: this.#timeout, params: this.buildQueryString(data)}).then((resp) => {
             logger.info('Data successfully pushed to WeatherUnderground.', { component: 'WeatherUndergroundSink'})
             logger.debug(`Response Data: ${resp.data}`, { component: 'WeatherUndergroundSink'})

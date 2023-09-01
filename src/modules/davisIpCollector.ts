@@ -42,7 +42,7 @@ class DavisIpCollector {
     }
 
      readDataFromStation() {
-        return new Promise<DavisResponseData>((resolve) => {
+        return new Promise<DavisResponseData>((resolve, reject) => {
             let client = new Socket()
             let receiveBuffer = Buffer.from('', 'hex')
 
@@ -68,16 +68,22 @@ class DavisIpCollector {
                 } else if (receiveBuffer.byteLength > 201) {
                     logger.error(`Unexpected amount of data received from Station. Expected 201Byte received ${receiveBuffer.byteLength}Byte`, {component: 'DavisIpCollector'})
                     client.end()
-                    throw new Error('Unexpected amount of data received from Station.')
+                    reject(new Error('Unexpected amount of data received from Station.'))
                 } else {
-                    resolve(this.parseWeatherStationResponse(receiveBuffer))
-                    client.end()
+                    logger.info('Data received from weather station', { component: 'DavisIpCollector'})
+                    try {
+                        resolve(this.parseWeatherStationResponse(receiveBuffer))
+                    } catch (ex) {
+                        reject(ex)
+                    } finally {
+                        client.end()
+                    }
                 }
             })
 
             client.on('error', (error) => {
                 logger.error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`, { component: 'DavisIpCollector'})
-                throw new Error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`)
+                reject(Error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`))
             })
 
             client.on('close', () => {
@@ -87,13 +93,13 @@ class DavisIpCollector {
             client.on('timeout', () => {
                 logger.warn(`No response from ${this.#ip} after ${this.#timeout}ms`, { component: 'DavisIpCollector'})
                 client.end();
-                throw new Error(`No response from ${this.#ip} after ${this.#timeout}ms`)
+                reject(Error(`No response from ${this.#ip} after ${this.#timeout}ms`))
             })
         })
     }
 
     setTime() {
-        return new Promise<void>((resolve) => {
+        return new Promise<void>((resolve, reject) => {
             let client = new Socket()
             let receiveBuffer = Buffer.from('', 'hex')
             let timeSent = false;
@@ -127,13 +133,13 @@ class DavisIpCollector {
                 } else {
                     logger.error(`Failed to set time on weather station. Error: Expecting ACK got: ${receiveBuffer.readUInt8()}`, { component: 'DavisIpCollector'})
                     client.end();
-                    throw new Error('Expecting ACK got: '+ receiveBuffer.readUInt8());
+                    reject(new Error('Expecting ACK got: '+ receiveBuffer.readUInt8()))
                 }
             });
 
             client.on('error', (error) => {
                 logger.error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`, { component: 'DavisIpCollector'})
-                throw new Error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`)
+                reject(new Error(`A error accorded while communicating whit the weather-station. Error: ${error.message}`))
             })
 
             client.on('close', () => {
@@ -143,7 +149,7 @@ class DavisIpCollector {
             client.on('timeout', () => {
                 logger.warn(`No response from ${this.#ip} after ${this.#timeout}ms`, { component: 'DavisIpCollector'})
                 client.end();
-                throw new Error(`No response from ${this.#ip} after ${this.#timeout}ms`)
+                reject( Error(`No response from ${this.#ip} after ${this.#timeout}ms`))
             })
         });
     }

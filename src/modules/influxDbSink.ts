@@ -20,7 +20,7 @@ class InfluxDbSink {
             return
         }
 
-        logger.info(`Uploading data to influxDB..`, { component: 'InfluxDbSink'})
+        logger.info(`Uploading data to influxDB...`, { component: 'InfluxDbSink'})
         axios.post(this.#apiUrl, this.buildQueryString(data), {timeout: this.#timeout}).then((resp) => {
             logger.info('Data successfully pushed to influxDB.', { component: 'InfluxDbSink'})
             logger.debug(`Response Data: ${resp.data}`, { component: 'InfluxDbSink'})
